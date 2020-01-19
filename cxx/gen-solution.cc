@@ -1,32 +1,98 @@
-#include <vector>
-#include <cstdint>
-#include <iostream>
-#include <fstream>
+/*
+   g++ -o gen-solution -O3 gen-solution.cc -l boost_program_options
+ */
 #include <cassert>
+#include <cstdint>
+#include <fstream>
+#include <iostream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
-#define INPARAM_q 3
-#define INPARAM_R 1
-#define INPARAM_n 4
+#include <boost/program_options.hpp>
 
-#define INPARAM_cnt 9
+namespace po = boost::program_options;
+
+class Params {
+public:
+  Params(int argc, char *argv[]);
+
+  std::uint32_t get_q() const { return q; }
+  std::uint32_t get_R() const { return R; }
+  std::uint32_t get_n() const { return n; }
+
+  std::uint64_t get_cnt() const { return cnt; }
+
+private:
+  std::uint32_t q;
+  std::uint32_t R;
+  std::uint32_t n;
+
+  std::uint64_t cnt;
+};
+
+Params::Params(int argc, char *argv[]) {
+  po::options_description desc("Allowed options");
+  desc.add_options()("help", "produce help message")(
+      "q", po::value<std::uint32_t>(), "set q - alphabet size")(
+      "R", po::value<std::uint32_t>(), "set R - max distance")(
+      "n", po::value<std::uint32_t>(), "set n - size / dimension")(
+      "cnt", po::value<std::uint64_t>(), "set cnt - number of codes / rooks");
+
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);
+
+  if (vm.count("help")) {
+    std::cout << desc << "\n";
+    exit(1);
+  }
+
+  if (vm.count("q")) {
+    q = vm["q"].as<std::uint32_t>();
+  } else {
+    std::cout << "Compression level was not set.\n";
+    exit(1);
+  }
+
+  if (vm.count("R")) {
+    R = vm["R"].as<std::uint32_t>();
+  } else {
+    std::cout << "Maximum distance was not set.\n";
+    exit(1);
+  }
+
+  if (vm.count("n")) {
+    n = vm["n"].as<std::uint32_t>();
+  } else {
+    std::cout << "Size was not set.\n";
+    exit(1);
+  }
+
+  if (vm.count("cnt")) {
+    cnt = vm["cnt"].as<std::uint64_t>();
+  } else {
+    std::cout << "Count was not set.\n";
+    exit(1);
+  }
+}
 
 class abn {
 public:
-  abn(std::uint32_t const dim, std::uint32_t const base, std::uint32_t const cnt=1)
-    : m_dim(dim), m_cnt(cnt), m_base(base), m_data(m_dim * m_cnt, 0) {}
+  abn(Params const &params)
+      : m_params(params), m_data(m_params.get_n() * m_params.get_cnt(), 0) {}
 
   void init_different_pos() {
-    abn pos(INPARAM_n, INPARAM_q);
-    for(int i(m_cnt -1); i>=0; --i) {
-      for(int j(0); j<m_dim; ++j) {
-	m_data[ i * m_dim + j] = pos.m_data[j];
+    abn pos(m_params);
+    for (int i(m_params.get_cnt() - 1); i >= 0; --i) {
+      for (int j(0); j < m_params.get_n(); ++j) {
+        m_data[i * m_params.get_n() + j] = pos.m_data[j];
       }
       ++pos;
     }
   }
 
+#if 0
   void init_perfect() {
     abn pos(INPARAM_n, INPARAM_q);
     for(int i(m_cnt -1); i>=0; --i) {
@@ -44,125 +110,129 @@ public:
       }	while(perfect.hamming_distance(0, pos)<=INPARAM_R);
     }
   }
+#endif
 
   void yaml() {
-    std::ofstream o(std::string("ub-") + std::to_string(INPARAM_cnt) + "-generated.yaml");
+    std::ofstream o(std::string("ub-") + std::to_string(m_params.get_q()) +
+                    "-" + std::to_string(m_params.get_R()) + "-" +
+                    std::to_string(m_params.get_n()) + "-" +
+                    std::to_string(m_params.get_cnt()) + "-generated.yaml");
     o << "---" << std::endl
-      << "q: " << INPARAM_q << std::endl
-      << "R: " << INPARAM_R << std::endl
-      << "n: " << INPARAM_n << std::endl
-      << "upper_bound: " << INPARAM_cnt << std::endl
-      << "generator: \"cc-gen-solution V0.0.1\"" << std::endl
+      << "q: " << m_params.get_q() << std::endl
+      << "R: " << m_params.get_R() << std::endl
+      << "n: " << m_params.get_n() << std::endl
+      << "upper_bound: " << m_params.get_cnt() << std::endl
+      << "generator: \"cc-gen-solution V0.0.2\"" << std::endl
       << "solution:" << std::endl;
-    for(int i(0); i<m_cnt; ++i) {
+    for (int i(0); i < m_params.get_cnt(); ++i) {
       o << "  - [";
-      for(int j(0); j<m_dim; ++j) {
-	o << m_data[ i * m_dim + j];
-	if(j!=m_dim-1) {
-	  o << ", ";
-	}
+      for (int j(0); j < m_params.get_n(); ++j) {
+        o << m_data[i * m_params.get_n() + j];
+        if (j != m_params.get_n() - 1) {
+          o << ", ";
+        }
       }
       o << "]" << std::endl;
     }
     o.close();
   }
 
-  std::ostream & print(std::ostream & out) const {
-    out << "[" << m_dim << "," << m_cnt << "," << m_base << ": ";
-    for(auto const & data : m_data) {
+  std::ostream &print(std::ostream &out) const {
+    out << "[" << m_params.get_n() << "," << m_params.get_cnt() << ","
+        << m_params.get_q() << ": ";
+    for (auto const &data : m_data) {
       out << data << " ";
     }
     out << "]";
     return out;
   }
 
-  abn & operator++() {
-    for(std::uint32_t i(0); i<m_data.size(); ++i) {
-      if(m_data[i] < m_base - 1) {
-	++m_data[i];
-	return *this;
+  abn &operator++() {
+    for (std::uint32_t i(0); i < m_data.size(); ++i) {
+      if (m_data[i] < m_params.get_q() - 1) {
+        ++m_data[i];
+        return *this;
       } else {
-	m_data[i] = 0;
+        m_data[i] = 0;
       }
     }
     throw std::out_of_range("++abn exhausted");
   }
 
-  int hamming_distance(int partitioning, abn const & pos) const {
+  int hamming_distance(int partitioning, abn const &pos) const {
     int hd(0);
 
-    assert(m_dim == pos.m_dim);
-    assert(m_base == pos.m_base);
-    
-    for(int i(0); i<m_dim; ++i) {
-      if(m_data[partitioning * m_dim + i]!=pos.m_data[i]) {
-	++hd;
+    assert(m_params.get_n() == pos.m_params.get_n());
+    assert(m_params.get_q() == pos.m_params.get_q());
+
+    for (int i(0); i < m_params.get_n(); ++i) {
+      if (m_data[partitioning * m_params.get_n() + i] != pos.m_data[i]) {
+        ++hd;
       }
     }
     return hd;
   }
 
 private:
-  std::uint32_t const m_dim;
-  std::uint32_t const m_cnt;
-  std::uint32_t const m_base;
+  Params const m_params;
   std::vector<std::uint32_t> m_data;
 };
 
-std::ostream & operator<<(std::ostream & out, abn const & a) {
+std::ostream &operator<<(std::ostream &out, abn const &a) {
   return a.print(out);
 }
 
-bool check_max_dist(abn const & rooks) {
-  abn pos(INPARAM_n, INPARAM_q);
+bool check_max_dist(abn const &rooks, Params const &params) {
+  abn pos(params);
 
-  
   try {
-  
-  while(true) {
 
-    int min_hd(INPARAM_n);
-    
-    for(std::uint32_t i(0); i<INPARAM_cnt; ++i) {
-      int const hd(rooks.hamming_distance(i, pos));
+    while (true) {
 
-      // std::cout << "HD from " << rooks << " part " << i << " to " << pos << " is " << hd << std::endl;
+      int min_hd(params.get_n());
 
-      if(hd < min_hd){
-	min_hd = hd;
+      for (std::uint32_t i(0); i < params.get_cnt(); ++i) {
+        int const hd(rooks.hamming_distance(i, pos));
+
+        // std::cout << "HD from " << rooks << " part " << i << " to " << pos <<
+        // " is " << hd << std::endl;
+
+        if (hd < min_hd) {
+          min_hd = hd;
+        }
+
+        if (min_hd < params.get_R()) {
+          break;
+        }
       }
 
-      if(min_hd < INPARAM_R) {
-	break;
+      // std::cout << "Min hd " << min_hd << std::endl;
+
+      if (min_hd > params.get_R()) {
+        // std::cout << "FAIL" << std::endl;
+        return false;
       }
+
+      // std::cout << pos << std::endl;
+      ++pos;
     }
-
-    //std::cout << "Min hd " << min_hd << std::endl;
-
-    if(min_hd > INPARAM_R) {
-      //std::cout << "FAIL" << std::endl;
-      return false;
-    }
-    
-    //std::cout << pos << std::endl;
-    ++pos;
-
-  }
-  } catch(std::out_of_range & e) {
+  } catch (std::out_of_range &e) {
   }
   return true;
 }
 
-int main() {
-  abn rooks(INPARAM_n, INPARAM_q, INPARAM_cnt);
+int main(int argc, char *argv[]) {
 
-  //  rooks.init_different_pos();
-  rooks.init_perfect();
+  Params const params(argc, argv);
+
+  abn rooks(params);
+  rooks.init_different_pos();
+  // rooks.init_perfect();
 
   std::uint32_t round(0);
 
-  while(true) {
-    if(check_max_dist(rooks)) {
+  while (true) {
+    if (check_max_dist(rooks, params)) {
       std::cout << "HURRAY " << rooks << std::endl;
       rooks.yaml();
       break;
@@ -171,11 +241,9 @@ int main() {
     ++rooks;
 
     ++round;
-    if(round%10000000 == 0) {
+    if (round % 10000000 == 0) {
       std::cout << "Status " << rooks << std::endl;
     }
-    
-    
   }
 
   return 0;
