@@ -77,7 +77,7 @@ init_problem_type(po::variables_map const &vm) {
   if (vm.count("q")) {
     q = vm["q"].as<type_q>();
   } else {
-    std::cout << "Compression level was not set.\n";
+    std::cout << "Size (q) was not set.\n";
     exit(1);
   }
 
