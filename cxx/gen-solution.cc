@@ -11,13 +11,6 @@
 
 template <typename type_q = std::uint32_t, typename type_R = std::uint32_t,
           typename type_n = std::uint32_t, typename type_cnt = std::uint64_t>
-std::ostream &operator<<(std::ostream &out,
-                         abn<type_q, type_R, type_n, type_cnt> const &a) {
-  return a.print(out);
-}
-
-template <typename type_q = std::uint32_t, typename type_R = std::uint32_t,
-          typename type_n = std::uint32_t, typename type_cnt = std::uint64_t>
 bool check_max_dist(abn<type_q, type_R, type_n, type_cnt> const &rooks,
                     ProblemSize<type_q, type_R, type_n> const &ps,
                     type_cnt const cnt) {

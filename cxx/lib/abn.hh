@@ -109,7 +109,7 @@ public:
       std::cout << "Checking " << c << ": " << std::endl;
       if (is_double_covered(c)) {
         std::cout << "NOTHING FOUND 3" << std::endl;
-	abort();
+        abort();
       }
     }
 
@@ -191,7 +191,7 @@ public:
   }
 
   /*
-   * Computes the maximum hamming distance of the current data / code
+   * Computes the minimum hamming distance of the current data / code
    * to the complete set of fields.
    */
   n_t hamming_distance_min(abn const &that, n_t const that_idx) const {
@@ -219,7 +219,6 @@ public:
     return true;
   }
 
-private:
   // Sets the local data at index 'idx' to the that objects' that_idx value.
   inline void copy_data(n_t const local_idx, abn const &that,
                         n_t const that_idx) {
@@ -228,6 +227,9 @@ private:
     }
   }
 
+  n_t get(n_t const idx) { return data[idx]; }
+  
+private:
   cnt_t const cnt;
   q_t const q;
   R_t const R;
@@ -235,3 +237,10 @@ private:
   std::vector<n_t> data;
   bool exhausted;
 };
+
+template <typename type_q = std::uint32_t, typename type_R = std::uint32_t,
+          typename type_n = std::uint32_t, typename type_cnt = std::uint64_t>
+std::ostream &operator<<(std::ostream &out,
+                         abn<type_q, type_R, type_n, type_cnt> const &a) {
+  return a.print(out);
+}
