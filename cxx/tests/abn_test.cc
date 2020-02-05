@@ -77,3 +77,23 @@ BOOST_AUTO_TEST_CASE(test_hamming_distance_01) {
     }
   }
 }
+
+BOOST_AUTO_TEST_CASE(test_hamming_distance_min_01) {
+  abn<> code(3, 1, 3, 5);
+
+  abn<> field(3, 1, 3, 1);
+  for (int fp(0); fp < 4; ++fp) {
+    ++field;
+    code.copy_data(fp, field, 0);
+  }
+
+  int const results[] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                         2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2};
+  int ri(0);
+
+  for (abn<> df(3, 1, 3, 1); df.not_exhausted(); ++df) {
+    //    std::cout << "HD " << df << " -> " << code << std::endl;
+    BOOST_TEST(code.hamming_distance_min(df, 0) == results[ri]);
+    ++ri;
+  }
+}
