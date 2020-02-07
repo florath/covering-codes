@@ -9,6 +9,8 @@
 #include <iostream>
 #include <vector>
 
+// #define TRACE
+
 template <typename q_t = std::uint32_t, typename R_t = std::uint32_t,
           typename n_t = std::uint32_t, typename cnt_ti = std::uint64_t>
 class abn {
@@ -26,11 +28,16 @@ public:
     }
   }
 
-  // Check if there is a double cover of codes[0:cn] for field
-  bool is_double_covered(cnt_t const cn, abn const &field) {
+  // Check if there is a double cover of codes[0:cn) for field
+  bool is_double_covered(cnt_t const cn, abn const &field,
+                         n_t const field_idx = 0) {
     cnt_t covered(0);
-    for (cnt_t code(0); code <= cn; ++code) {
-      if (hamming_distance(code, field, 0) <= R) {
+    for (cnt_t code_idx(0); code_idx < cn; ++code_idx) {
+      n_t const hd(hamming_distance(code_idx, field, field_idx));
+#ifdef TRACE
+      std::cout << "Hamming distance [" << hd << "]" << std::endl;
+#endif
+      if (hd <= R) {
         ++covered;
         if (covered > 1) {
 #ifdef TRACE
@@ -54,6 +61,8 @@ public:
       field.print(std::cout);
       std::cout << std::endl;
 #endif
+      std::cerr << "INTERFACE CHANGE" << std::endl;
+      abort();
       if (is_double_covered(cn, field)) {
         return true;
       }
@@ -98,6 +107,8 @@ public:
         print(std::cout);
         std::cout << std::endl;
 #endif
+        std::cerr << "INTERFACE CHANGE" << std::endl;
+        abort();
         if (!is_double_covered(code_pos)) {
           std::cout << "NOT DOUBLE COVERED" << std::endl;
           break;
@@ -107,6 +118,8 @@ public:
     }
     for (int c(0); c < cnt; ++c) {
       std::cout << "Checking " << c << ": " << std::endl;
+      std::cerr << "INTERFACE CHANGE" << std::endl;
+      abort();
       if (is_double_covered(c)) {
         std::cout << "NOTHING FOUND 3" << std::endl;
         abort();
@@ -212,7 +225,7 @@ public:
       field.print(std::cout);
       std::cout << " [" << hdm << "]" << std::endl;
       if (hdm > R) {
-        std::cerr << "Hamming distance max [" << hdm << "]" << std::endl;
+        std::cerr << "Hamming distance min [" << hdm << "]" << std::endl;
         abort();
       }
     }
@@ -228,7 +241,7 @@ public:
   }
 
   n_t get(n_t const idx) { return data[idx]; }
-  
+
 private:
   cnt_t const cnt;
   q_t const q;

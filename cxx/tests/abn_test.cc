@@ -97,3 +97,84 @@ BOOST_AUTO_TEST_CASE(test_hamming_distance_min_01) {
     ++ri;
   }
 }
+
+BOOST_AUTO_TEST_CASE(test_is_double_covered_01) {
+  abn<> code(3, 1, 3, 5);
+
+  abn<> field(3, 1, 3, 1);
+  for (int fp(0); fp < 5; ++fp) {
+    ++field;
+    code.copy_data(fp, field, 0);
+  }
+
+  ++field;
+
+  // [3/1/3-5: 1 0 0  2 0 0  0 1 0  1 1 0  ### 2 1 0 ]
+
+  bool const results[] = {// 0 0 0
+                          false, false, true, true, true,
+                          // 1 0 0
+                          false, false, true, true, true,
+                          // 2 0 0
+                          false, false, true, true, true,
+                          // 0 1 0
+                          false, false, false, false, true,
+                          // 1 1 0
+                          false, false, false, true, true,
+                          // 2 1 0
+                          false, false, false, true, true,
+                          // 0 2 0
+                          false, false, false, false, false,
+                          // 1 2 0
+                          false, false, false, false, true,
+                          // 2 2 0
+                          false, false, false, false, false,
+                          // 0 0 1
+                          false, false, false, false, false,
+                          // 1 0 1
+                          false, false, false, false, false,
+                          // 2 0 1
+                          false, false, false, false, false,
+                          // 0 1 1
+                          false, false, false, false, false,
+                          // 1 1 1
+                          false, false, false, false, false,
+                          // 2 1 1
+                          false, false, false, false, false,
+                          // 0 2 1
+                          false, false, false, false, false,
+                          // 1 2 1
+                          false, false, false, false, false,
+                          // 2 2 1
+                          false, false, false, false, false,
+                          // 0 0 2
+                          false, false, false, false, false,
+                          // 1 0 2
+                          false, false, false, false, false,
+                          // 2 0 2
+                          false, false, false, false, false,
+                          // 0 1 2
+                          false, false, false, false, false,
+                          // 1 1 2
+                          false, false, false, false, false,
+                          // 2 1 2
+                          false, false, false, false, false,
+                          // 0 2 2
+                          false, false, false, false, false,
+                          // 1 2 2
+                          false, false, false, false, false,
+                          // 2 2 2
+                          false, false, false, false, false,
+
+                          7777, 7777};
+  int ri(0);
+
+  for (abn<> df(3, 1, 3, 1); df.not_exhausted(); ++df) {
+    for (std::uint32_t cn(0); cn < 5; ++cn) {
+      // std::cout << "IDC [" << cn << "] " << df << " -> " << code <<
+      // std::endl;
+      BOOST_TEST(code.is_double_covered(cn, df) == results[ri]);
+      ++ri;
+    }
+  }
+}
