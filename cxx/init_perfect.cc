@@ -2,7 +2,7 @@
    g++ -o init_perfect -O3 init_perfect.cc -l boost_program_options
  */
 
-#include "abn.hh"
+#include "lib/abn.hh"
 #include "Params.hh"
 
 int main(int argc, char *argv[]) {

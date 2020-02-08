@@ -107,66 +107,172 @@ BOOST_AUTO_TEST_CASE(test_is_double_covered_01) {
     code.copy_data(fp, field, 0);
   }
 
-  ++field;
-
   // [3/1/3-5: 1 0 0  2 0 0  0 1 0  1 1 0  ### 2 1 0 ]
 
-  bool const results[] = {// 0 0 0
-                          false, false, true, true, true,
-                          // 1 0 0
-                          false, false, true, true, true,
-                          // 2 0 0
-                          false, false, true, true, true,
-                          // 0 1 0
-                          false, false, false, false, true,
-                          // 1 1 0
-                          false, false, false, true, true,
-                          // 2 1 0
-                          false, false, false, true, true,
-                          // 0 2 0
-                          false, false, false, false, false,
-                          // 1 2 0
-                          false, false, false, false, true,
-                          // 2 2 0
-                          false, false, false, false, false,
-                          // 0 0 1
-                          false, false, false, false, false,
-                          // 1 0 1
-                          false, false, false, false, false,
-                          // 2 0 1
-                          false, false, false, false, false,
-                          // 0 1 1
-                          false, false, false, false, false,
-                          // 1 1 1
-                          false, false, false, false, false,
-                          // 2 1 1
-                          false, false, false, false, false,
-                          // 0 2 1
-                          false, false, false, false, false,
-                          // 1 2 1
-                          false, false, false, false, false,
-                          // 2 2 1
-                          false, false, false, false, false,
-                          // 0 0 2
-                          false, false, false, false, false,
-                          // 1 0 2
-                          false, false, false, false, false,
-                          // 2 0 2
-                          false, false, false, false, false,
-                          // 0 1 2
-                          false, false, false, false, false,
-                          // 1 1 2
-                          false, false, false, false, false,
-                          // 2 1 2
-                          false, false, false, false, false,
-                          // 0 2 2
-                          false, false, false, false, false,
-                          // 1 2 2
-                          false, false, false, false, false,
-                          // 2 2 2
-                          false, false, false, false, false,
-
-                          7777, 7777};
+  bool const results[] = {
+      // 0 0 0
+      false,
+      false,
+      true,
+      true,
+      true,
+      // 1 0 0
+      false,
+      false,
+      true,
+      true,
+      true,
+      // 2 0 0
+      false,
+      false,
+      true,
+      true,
+      true,
+      // 0 1 0
+      false,
+      false,
+      false,
+      false,
+      true,
+      // 1 1 0
+      false,
+      false,
+      false,
+      true,
+      true,
+      // 2 1 0
+      false,
+      false,
+      false,
+      true,
+      true,
+      // 0 2 0
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 1 2 0
+      false,
+      false,
+      false,
+      false,
+      true,
+      // 2 2 0
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 0 0 1
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 1 0 1
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 2 0 1
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 0 1 1
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 1 1 1
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 2 1 1
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 0 2 1
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 1 2 1
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 2 2 1
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 0 0 2
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 1 0 2
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 2 0 2
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 0 1 2
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 1 1 2
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 2 1 2
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 0 2 2
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 1 2 2
+      false,
+      false,
+      false,
+      false,
+      false,
+      // 2 2 2
+      false,
+      false,
+      false,
+      false,
+      false,
+  };
   int ri(0);
 
   for (abn<> df(3, 1, 3, 1); df.not_exhausted(); ++df) {
@@ -177,4 +283,44 @@ BOOST_AUTO_TEST_CASE(test_is_double_covered_01) {
       ++ri;
     }
   }
+}
+
+BOOST_AUTO_TEST_CASE(test_is_double_covered_02) {
+  abn<> code(3, 1, 3, 5);
+
+  abn<> field(3, 1, 3, 1);
+  for (int fp(0); fp < 5; ++fp) {
+    ++field;
+    code.copy_data(fp, field, 0);
+  }
+
+  // [3/1/3-5: 1 0 0  2 0 0  0 1 0  1 1 0  2 1 0 ]
+
+  bool const results[] = {false, false, true, true, true};
+  for (std::uint32_t cn(0); cn < 5; ++cn) {
+    // std::cout << "IDC [" << cn << "] -> " << code << std::endl;
+    bool const res(code.is_double_covered(cn));
+    // std::cout << "RES [" << res << "]" << std::endl;
+    BOOST_TEST(res == results[cn]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_init_perfect_2_1_2_1) {
+  abn<> code(2, 1, 2, 1);
+  code.init_perfect();
+  // std::cout << "CODE " << code << std::endl;
+  BOOST_TEST(code.get(0) == 0);
+  BOOST_TEST(code.get(1) == 0);
+}
+
+BOOST_AUTO_TEST_CASE(test_init_perfect_2_1_3_2) {
+  abn<> code(2, 1, 3, 2);
+  code.init_perfect();
+  std::cout << "CODE " << code << std::endl;
+  BOOST_TEST(code.get(0) == 0);
+  BOOST_TEST(code.get(1) == 0);
+  BOOST_TEST(code.get(2) == 0);
+  BOOST_TEST(code.get(3) == 1);
+  BOOST_TEST(code.get(4) == 1);
+  BOOST_TEST(code.get(5) == 1);
 }

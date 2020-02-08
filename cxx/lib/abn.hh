@@ -9,7 +9,8 @@
 #include <iostream>
 #include <vector>
 
-// #define TRACE
+//#define TRACE
+//#define DEBUG
 
 template <typename q_t = std::uint32_t, typename R_t = std::uint32_t,
           typename n_t = std::uint32_t, typename cnt_ti = std::uint64_t>
@@ -31,6 +32,7 @@ public:
   // Check if there is a double cover of codes[0:cn) for field
   bool is_double_covered(cnt_t const cn, abn const &field,
                          n_t const field_idx = 0) {
+    assert(cn <= cnt);
     cnt_t covered(0);
     for (cnt_t code_idx(0); code_idx < cn; ++code_idx) {
       n_t const hd(hamming_distance(code_idx, field, field_idx));
@@ -50,27 +52,20 @@ public:
     return false;
   }
 
-  // Check if there is a double cover of codes[0:cn] for complete field
+  // Check if there is a double cover of codes[0:cn) for complete code set
+  // (field)
   bool is_double_covered(cnt_t const cn) {
     for (abn field(q, R, n, 1); field.not_exhausted(); ++field) {
 #ifdef TRACE
-      std::cout << "TRACE ";
-      print(std::cout);
-      std::cout << std::endl;
-      std::cout << "      ";
-      field.print(std::cout);
-      std::cout << std::endl;
+      std::cout << "TRACE " << field << " cn [" << cn << "] " << (*this)
+                << std::endl;
 #endif
-      std::cerr << "INTERFACE CHANGE" << std::endl;
-      abort();
       if (is_double_covered(cn, field)) {
         return true;
       }
     }
 #ifdef DEBUG
-    std::cout << "CATCH FIELD ";
-    print(std::cout);
-    std::cout << std::endl;
+    std::cout << "NOT DOUBLE COVERED " << (*this) << std::endl;
 #endif
     return false;
   }
@@ -79,6 +74,10 @@ public:
     // For number of codes
     abn cur_code(q, R, n, 1);
     for (cnt_t code_pos(0); code_pos < cnt; ++code_pos) {
+#define TRACE1
+#ifdef TRACE1
+      std::cout << "CODE POS [" << code_pos << "] " << cur_code << std::endl;
+#endif
       if (not cur_code.not_exhausted()) {
         std::cerr << "DOES NOT WORK OUT 1" << std::endl;
         abort();
@@ -88,39 +87,26 @@ public:
         abort();
       }
       for (; cur_code.not_exhausted(); ++cur_code) {
-        std::cout << "Code Position: " << code_pos << " " << std::flush;
 #ifdef DEBUG
-        std::uint32_t loop_cnt(0);
-#endif
-
-#ifdef DEBUG
-        ++loop_cnt;
-        if (loop_cnt % 1000 == 0) {
-          std::cout << code_pos << " CURCODE ";
-          cur_code.print(std::cout);
-          std::cout << std::endl;
-        }
+        std::cout << "[" << code_pos << "] CURCODE " << (*this) << std::endl;
 #endif
         copy_data(code_pos, cur_code, 0);
 #ifdef TRACE
-        std::cout << code_pos << " AFTERCOPY ";
-        print(std::cout);
-        std::cout << std::endl;
+        std::cout << code_pos << " AFTERCOPY " << (*this) << std::endl;
 #endif
-        std::cerr << "INTERFACE CHANGE" << std::endl;
-        abort();
-        if (!is_double_covered(code_pos)) {
+        // abort();
+        if (!is_double_covered(code_pos + 1)) {
           std::cout << "NOT DOUBLE COVERED" << std::endl;
           break;
         }
-        std::cout << "DOUBLE COVERTED" << std::endl;
+        // std::cout << "DOUBLE COVERTED" << std::endl;
       }
     }
-    for (int c(0); c < cnt; ++c) {
+    for (cnt_t c(0); c < cnt; ++c) {
       std::cout << "Checking " << c << ": " << std::endl;
-      std::cerr << "INTERFACE CHANGE" << std::endl;
-      abort();
-      if (is_double_covered(c)) {
+      // std::cerr << "INTERFACE CHANGE" << std::endl;
+      // abort();
+      if (is_double_covered(c + 1)) {
         std::cout << "NOTHING FOUND 3" << std::endl;
         abort();
       }
@@ -221,9 +207,8 @@ public:
   bool complete_covered() const {
     for (abn field(q, R, n, 1); field.not_exhausted(); ++field) {
       n_t const hdm(hamming_distance_min(field, 0));
-      std::cout << "HDM ";
-      field.print(std::cout);
-      std::cout << " [" << hdm << "]" << std::endl;
+      std::cout << "HDM " << (*this) << " [" << hdm << "] " << field
+                << std::endl;
       if (hdm > R) {
         std::cerr << "Hamming distance min [" << hdm << "]" << std::endl;
         abort();
