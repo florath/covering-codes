@@ -7,15 +7,15 @@
 #include <string>
 
 #include "Params.hh"
-#include "abn.hh"
+#include "lib/abn.hh"
 
 template <typename type_q = std::uint32_t, typename type_R = std::uint32_t,
           typename type_n = std::uint32_t, typename type_cnt = std::uint64_t>
 bool check_max_dist(abn<type_q, type_R, type_n, type_cnt> const &rooks,
                     ProblemSize<type_q, type_R, type_n> const &ps,
                     type_cnt const cnt) {
-  for (abn<type_q, type_R, type_n, type_cnt> pos(ps.q, ps.R, ps.n, cnt); pos.not_exhausted();
-       ++pos) {
+  for (abn<type_q, type_R, type_n, type_cnt> pos(ps.q, ps.R, ps.n, cnt);
+       pos.not_exhausted(); ++pos) {
     type_n min_hd(ps.n);
 
     for (std::uint32_t i(0); i < cnt; ++i) {
@@ -50,11 +50,7 @@ int main(int argc, char *argv[]) {
 
   abn<> rooks(params.get_problem_size().q, params.get_problem_size().R,
               params.get_problem_size().n, params.get_cnt());
-  // rooks.init_different_pos();
-  rooks.init_perfect();
-
-  std::cout << "Init perfect finished" << std::endl;
-  abort();
+  rooks.init_different_pos();
 
   std::uint32_t round(0);
 

@@ -1,0 +1,10 @@
+---
+q: 3
+R: 3
+n: 4
+upper_bound: 3
+generator: "cc-gen-solution V0.0.2"
+solution:
+  - [2, 0, 0, 0]
+  - [1, 0, 0, 0]
+  - [0, 0, 0, 0]
