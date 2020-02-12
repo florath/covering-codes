@@ -1,9 +1,5 @@
-/*
-   g++ -o init_perfect -O3 init_perfect.cc -l boost_program_options
- */
-
-#include "lib/abn.hh"
 #include "Params.hh"
+#include "lib/abn.hh"
 
 int main(int argc, char *argv[]) {
   Params<> const params(argc, argv);
@@ -15,7 +11,10 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Init perfect finished" << std::endl;
 
-  if (rooks.complete_covered()) {
+  std::pair<std::uint64_t, std::uint64_t> const covered(rooks.covered_cnt());
+  std::cout << "Not covered [" << covered.second << "]" << std::endl;
+
+  if (covered.second == 0) {
     std::cout << "Complete coverage" << std::endl;
     return 0;
   } else {

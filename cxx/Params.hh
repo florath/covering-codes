@@ -1,4 +1,5 @@
 #include <boost/program_options.hpp>
+#include <iostream>
 
 namespace po = boost::program_options;
 
@@ -26,7 +27,7 @@ class Params {
 public:
   using ProblemType = ProblemSize<type_q, type_R, type_n>;
 
-  Params(int argc, char *argv[]);
+  Params(int argc, char *argv[], bool with_cnt = true);
 
   ProblemType const &get_problem_size() const { return ps; }
   type_cnt get_cnt() const { return cnt; }
@@ -101,7 +102,8 @@ template <typename type_cnt> type_cnt init_cnt(po::variables_map const &vm) {
 } // namespace
 
 template <typename type_q, typename type_R, typename type_n, typename type_cnt>
-Params<type_q, type_R, type_n, type_cnt>::Params(int argc, char *argv[])
+Params<type_q, type_R, type_n, type_cnt>::Params(int argc, char *argv[],
+                                                 bool with_cnt)
     : vm(init_variables_map(argc, argv)),
       ps(init_problem_type<type_q, type_R, type_n>(vm)),
-      cnt(init_cnt<type_cnt>(vm)) {}
+      cnt(with_cnt ? init_cnt<type_cnt>(vm) : 0) {}

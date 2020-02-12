@@ -204,17 +204,23 @@ public:
     return hdm;
   }
 
-  bool complete_covered() const {
+  /*
+   * Returns the count of covered codes and not covered codes.
+   */
+  std::pair<cnt_t, cnt_t> covered_cnt() const {
+    cnt_t covered(0);
+    cnt_t not_covered(0);
     for (abn field(q, R, n, 1); field.not_exhausted(); ++field) {
       n_t const hdm(hamming_distance_min(field, 0));
-      std::cout << "HDM " << (*this) << " [" << hdm << "] " << field
-                << std::endl;
+      // std::cout << "HDM " << (*this) << " [" << hdm << "] " << field
+      //          << std::endl;
       if (hdm > R) {
-        std::cerr << "Hamming distance min [" << hdm << "]" << std::endl;
-        abort();
+        ++not_covered;
+      } else {
+        ++covered;
       }
     }
-    return true;
+    return std::make_pair(covered, not_covered);
   }
 
   // Sets the local data at index 'idx' to the that objects' that_idx value.

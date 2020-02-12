@@ -18,3 +18,4 @@ tests/.deps/
 tests/.dirstamp
 tests/abn_test
 tests/abn_test.o
+perfect_codes_size_check.o
